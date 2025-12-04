@@ -1,0 +1,4 @@
+TEXT_DIM = 768
+AUDIO_DIM =74
+VISION_DIM = 35
+max_seq_length = 50
