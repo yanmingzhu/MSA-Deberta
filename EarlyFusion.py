@@ -1,17 +1,19 @@
 from transformers import DebertaV2Model
 import torch
 import torch.nn as nn
+from config import *
 
-class TextDebertaMM(nn.Module):
-  def __init__(self, dim=768):
-    super(TextDebertaMM, self).__init__()
-    self.dim = dim
-
+class EarlyDebertaMM(nn.Module):
+  def __init__(self, hidden_dim=512, nhead=8, nlayer=4):
+    super(EarlyDebertaMM, self).__init__()
     self.deberta = DebertaV2Model.from_pretrained('microsoft/deberta-v3-base')
 
-    self.fc1 = nn.Linear(dim, 512)
+    self.audio_proj = nn.Linear(AUDIO_DIM, TEXT_DIM)
+    self.vision_proj = nn.Linear(VISION_DIM, TEXT_DIM)
+
+    self.fc1 = nn.Linear(TEXT_DIM, hidden_dim)
     self.dropout = nn.Dropout(0.2)
-    self.fc2 = nn.Linear(512, 1)
+    self.fc2 = nn.Linear(hidden_dim, 1)
 
   def forward(self, text, audio, vision, masks=None):
     '''
@@ -26,7 +28,14 @@ class TextDebertaMM(nn.Module):
       print(f"infinities {inf_indices}")
       print(x_concat[inf_indices[0], inf_indices[1], :])
     '''
-    bert_output = self.deberta(input_ids=text, attention_mask=masks)
+
+    text_embedding = self.deberta.embeddings(text)
+    audio_embedding = self.audio_proj(audio)
+    vision_embedding = self.vision_proj(vision)
+    fused_embedding = text_embedding + audio_embedding + vision_embedding
+    #fused_embedding = self.deberta.embeddings.LayerNorm(fused_embedding)
+
+    bert_output = self.deberta(inputs_embeds=fused_embedding, attention_mask=masks)
 
     last_hidden = bert_output.last_hidden_state
     cls = last_hidden[:, 0]

@@ -129,9 +129,9 @@ def get_dataloaders(data, batch_size):
     dev_set = get_appropriate_dataset(data['dev'])
     test_set = get_appropriate_dataset(data['test'])
 
-    train_loader = DataLoader(train_set, batch_size=32, shuffle=True)
-    dev_loader = DataLoader(dev_set, batch_size=32, shuffle=True)
-    test_loader = DataLoader(test_set, batch_size=32, shuffle=True)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    dev_loader = DataLoader(dev_set, batch_size=batch_size*3, shuffle=True)
+    test_loader = DataLoader(test_set, batch_size=batch_size*3, shuffle=True)
 
     print(f"train {len(train_loader.dataset)}, dev {len(dev_loader.dataset)}, test {len(test_loader.dataset)}")
     return train_loader, dev_loader, test_loader
