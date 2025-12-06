@@ -9,6 +9,7 @@ from EarlyFusion import EarlyDebertaMM
 from evaluation import eval_model
 from TextDeberta import TextDebertaMM
 from GatedFusion import GatedDebertaMM
+from CrossModal import CrossModalDebertaMM
 import os
 
 def get_args():
@@ -20,6 +21,7 @@ def get_args():
                         default="late",
                         choices=["early", "late", "gated"])
     parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--modal", type=str, default="av", choices=["a", "v", "av", "none"])
     parser.add_argument("--hidden_dropout_prob", type=float, default=0.2)
     parser.add_argument("--data_file", type=str, default="data/mosei.pkl")
     parser.add_argument("--save_path", type=str, default="models/best_model.pth")
@@ -34,8 +36,10 @@ def get_model(fusion):
         return EarlyDebertaMM()
     elif fusion == 'gated':
         return GatedDebertaMM()
+    elif fusion == 'cross':
+        return CrossModalDebertaMM()
     else:
-        return LateDebertaMM()
+        return LateDebertaMM(modal=args.modal)
 
 if __name__ == "__main__":
     args = get_args()

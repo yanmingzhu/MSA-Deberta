@@ -27,18 +27,6 @@ def eval_model(model, test_loader, device):
             all_pred = np.append(all_pred, pred.cpu().detach().numpy())
             all_label = np.append(all_label, label.cpu().detach().numpy())
 
-
-    pred_nonzero = all_pred[all_label != 0]
-    label_nonzero = all_label[all_label != 0]
-    mae = np.mean(np.abs(pred_nonzero - label_nonzero))
-    corr = np.corrcoef(pred_nonzero, label_nonzero)[0,1]
-
-    binary_pred = pred_nonzero >= 0
-    binary_label = label_nonzero >= 0
-    acc = accuracy_score(binary_pred, binary_label)
-    f1 = f1_score(binary_pred , binary_label, average="weighted")
-    print(f"acc_2 = {acc}, MAE = {mae}, f1 = {f1}, corr={corr}")
-
     acc, f1, mae, corr = metrics(all_pred, all_label)
     print(f"acc_2 = {acc}, f1 = {f1}, MAE = {mae}, , corr={corr}")
 

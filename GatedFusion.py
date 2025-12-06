@@ -17,12 +17,12 @@ class GatedDebertaMM(nn.Module):
     self.vision_norm = nn.LayerNorm(TEXT_DIM)
 
     self.audioGate = nn.Sequential(
-      nn.Linear(TEXT_DIM, TEXT_DIM),
+      nn.Linear(TEXT_DIM*3, TEXT_DIM),
       nn.Sigmoid()
     )
 
     self.visionGate = nn.Sequential(
-      nn.Linear(TEXT_DIM, TEXT_DIM),
+      nn.Linear(TEXT_DIM*3, TEXT_DIM),
       nn.Sigmoid()
     )
 
@@ -38,8 +38,9 @@ class GatedDebertaMM(nn.Module):
     vision_embedding = self.vision_proj(vision)
     #vision_embedding = self.vision_norm(vision_embedding)
 
-    audio_gate = self.audioGate(text_embedding)
-    vision_gate = self.visionGate(text_embedding)
+    embedding_concat = torch.cat([text_embedding, audio_embedding, vision_embedding], dim=-1)
+    audio_gate = self.audioGate(embedding_concat)
+    vision_gate = self.visionGate(embedding_concat)
 
     fused_embedding = text_embedding + audio_gate * audio_embedding + vision_gate * vision_embedding
 
